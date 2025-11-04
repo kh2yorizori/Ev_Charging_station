@@ -51,4 +51,9 @@ public class MemDAOImpl implements MemDAO {
     public int phoneCheck(String phoneNumber) {
         return sqlSession.selectOne(NAMESPACE + ".phoneCheck", phoneNumber);
     }
+
+	@Override
+	public MemDTO findMemberBySocial(HashMap<String, String> param) {
+		return sqlSession.selectOne(NAMESPACE+".findMemberBySocial", param);
+	}
 }

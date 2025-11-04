@@ -29,32 +29,39 @@ public class MyPageController {
         log.info("@# role()");
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null) {
-            return "redirect:login_view";
+            // ✅ [수정] /login 매핑으로 리다이렉트
+            return "redirect:/login";
         }
 
         List<MyPageDTO> userData = service.list();
         model.addAttribute("userData", userData);
-        return "role";
+        
+        // ✅ [수정] 실제 JSP 경로
+        return "my_page/admin/role";
     }
 
     @RequestMapping("/list")
     public String list(HttpServletRequest request, Model model) {
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null) {
-            return "redirect:login_view";
+            // ✅ [수정] /login 매핑으로 리다이렉트
+            return "redirect:/login";
         }
 
         String memberId = (String) session.getAttribute("id");
         MyPageDTO userData = service.getUserById(memberId);
         model.addAttribute("user", userData);
-        return "list";
+        
+        // ✅ [수정] 실제 JSP 경로
+        return "my_page/list";
     }
 
     @RequestMapping("/modify")
     public String modify(HttpServletRequest request, @RequestParam HashMap<String, String> param, Model model) {
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null) {
-            return "redirect:login_view";
+            // ✅ [수정] /login 매핑으로 리다이렉트
+            return "redirect:/login";
         }
 
         String memberId = (String) session.getAttribute("id");
@@ -63,14 +70,17 @@ public class MyPageController {
         log.info("@# modify() param: " + param);
         service.modify(param);
 
-        return "redirect:list";
+        // ✅ [수정] /list 매핑으로 리다이렉트
+        return "redirect:/list";
     }
 
     @RequestMapping("/mypage_edit")
     public String edit(@RequestParam("memberId") String memberId, Model model) {
         MyPageDTO userData = service.getUserById(memberId);
         model.addAttribute("user", userData);
-        return "mypage_edit";
+        
+        // ✅ [수정] 실제 JSP 경로
+        return "my_page/mypage_edit";
     }
 
     @RequestMapping("/delete")
@@ -83,7 +93,7 @@ public class MyPageController {
             session.invalidate();
         }
 
-        return "redirect:home";
+        return "redirect:/home";
     }
 
     @RequestMapping("/delete2")
@@ -91,6 +101,7 @@ public class MyPageController {
         log.info("@# delete2() param: " + param);
         service.delete(param);
 
-        return "redirect:role";
+        // ✅ [수정] /role 매핑으로 리다이렉트
+        return "redirect:/role";
     }
 }
