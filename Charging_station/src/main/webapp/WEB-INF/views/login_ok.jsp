@@ -36,8 +36,12 @@ body {
         </c:choose>
     </p>
 
-    <a href="home" class="btn btn-primary mt-3">홈으로 이동</a>
-    <a href="logout" class="btn btn-danger mt-3">로그아웃</a>
+    <!-- 버튼 영역 -->
+    <div class="mt-3">
+        <a href="home" class="btn btn-primary me-2">홈으로 이동</a>
+        <a href="logout" class="btn btn-danger me-2">로그아웃</a>
+        <a href="list" class="btn btn-success">마이페이지</a>
+    </div>
 </div>
 
 </body>
