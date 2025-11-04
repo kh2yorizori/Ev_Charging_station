@@ -6,7 +6,6 @@
 	<mappers>
 		<mapper resource="mybatis/mappers/MemMapper.xml"/>
 		<mapper resource="mybatis/mappers/MyPageMapper.xml"/>
-		<mapper resource="mybatis/mappers/elec.xml"/>
 	</mappers>
 </configuration>
 
