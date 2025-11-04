@@ -28,6 +28,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	 // MyBatis 및 DB 커넥터
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.1'
+    implementation 'org.springframework.boot:spring-boot-starter-mail' //이메일 인증 의존성
     runtimeOnly 'com.mysql:mysql-connector-j'
     // ⭐ JSP 사용을 위한 필수 의존성 (문제 해결을 위해 남겨야 함)
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'

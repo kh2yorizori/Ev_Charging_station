@@ -70,4 +70,16 @@
         WHERE social_type = #{socialType} AND social_id = #{socialId}
     </select>
 
+
+	<select id="findUserByIdAndEmail" resultType="com.boot.login.dto.MemDTO" parameterType="java.util.HashMap">
+    SELECT * FROM   member_tb 
+    WHERE  member_id = #{MEMBER_ID} 
+      AND  email = #{email} 
+</select>
+
+<update id="updatePassword" parameterType="java.util.HashMap">
+    UPDATE member_tb 
+    SET    password = #{PASSWORD} 
+    WHERE  member_id = #{MEMBER_ID}
+</update>
 </mapper>

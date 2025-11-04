@@ -22,4 +22,8 @@ public interface MemService {
     
     //소셜 로그인 처리 조회/가입 
     MemDTO findOrCreateMember(HashMap<String, String> socialUserInfo);
+    
+    //이메일 인증
+	MemDTO findUserByIdAndEmail(HashMap<String, String> param);
+	void updatePassword(HashMap<String, String> param);
 }

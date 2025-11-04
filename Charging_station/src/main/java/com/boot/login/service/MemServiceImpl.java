@@ -125,4 +125,14 @@ public class MemServiceImpl implements MemService {
         // 3. 최종적으로 회원 정보 반환 (신규 회원이든 기존 회원이든)
         return member;
     }
+
+	@Override
+	public MemDTO findUserByIdAndEmail(HashMap<String, String> param) {
+		return memDAO.findUserByIdAndEmail(param);
+	}
+
+	@Override
+	public void updatePassword(HashMap<String, String> param) {
+		memDAO.updatePassword(param);
+	}
 }

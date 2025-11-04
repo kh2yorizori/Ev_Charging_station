@@ -12,5 +12,82 @@
 		    user_restriction, latitude, longitude
 		FROM charging_stations
     </select>
+    
+<select id="searchStations" parameterType="map" resultType="com.boot.Main_Page.dto.ElecDTO">
+        SELECT
+            -- 1. 그룹의 기준이 되는 컬럼 (충전소의 고유 식별 정보)
+            station_name,
+            address,
+            latitude,
+            longitude,
+            city,
+            district,
+            
+            -- 2. 집계 함수 (대표값, 총 개수, 타입별 개수)
+            MIN(id) AS id, -- 그룹 중 대표 ID 1개
+            MIN(installation_year) AS installation_year,
+            MIN(facility_type_large) AS facility_type_large,
+            MIN(facility_type_small) AS facility_type_small,
+            MIN(charger_model_large) AS charger_model_large,
+            MIN(operator_large) AS operator_large,
+            MIN(operator_small) AS operator_small,
+            MIN(user_restriction) AS user_restriction,
+            
+            -- (옵션) 모델/용량을 쉼표로 묶기 (필요 없다면 이 2줄은 삭제 가능)
+            GROUP_CONCAT(DISTINCT charger_model_small SEPARATOR ', ') AS charger_model_small,
+            GROUP_CONCAT(DISTINCT fast_charge_capacity SEPARATOR ', ') AS fast_charge_capacity,
+            
+            -- 충전소 내 총 충전기 개수
+            COUNT(*) AS charger_count,
+            
+            -- 거리 (그룹 중 가장 가까운 값, 어차피 거의 동일)
+            MIN(distance_m) AS distance_m,
+
+            -- 3. [핵심] 타입별 개수 (조건부 집계)
+            SUM(CASE WHEN charger_type = 'DC콤보' THEN 1 ELSE 0 END) AS count_dc_combo,
+            SUM(CASE WHEN charger_type = 'AC3상' THEN 1 ELSE 0 END) AS count_ac3,
+            SUM(CASE WHEN charger_type = 'DC차데모+AC3상+DC콤보' THEN 1 ELSE 0 END) AS count_multi,
+            SUM(CASE WHEN charger_type = 'DC차데모' THEN 1 ELSE 0 END) AS count_chademo
+            -- (※※※ 다른 타입이 있다면 여기에 SUM(CASE...)을 계속 추가 ※※※)
+
+        FROM (
+            -- 4. [서브쿼리] 먼저 사용자가 요청한 반경(radius) 내의 모든 '충전기'를 찾습니다.
+            -- (기존 쿼리와 거의 동일 + 모든 컬럼 선택)
+            SELECT 
+                *,  -- charging_stations의 모든 컬럼을 가져옴
+                (9556500 * ACOS(COS(RADIANS(#{targetLat})) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(#{targetLng})) + 
+                               SIN(RADIANS(#{targetLat})) * SIN(RADIANS(latitude)))) AS distance_m
+            FROM charging_stations  
+            HAVING distance_m &lt;= #{radius}
+        ) AS NearbyChargers
+        
+        -- 5. 반경 내에서 찾은 충전기들을 '충전소' 단위로 그룹화합니다.
+        GROUP BY
+            station_name,
+            address,
+            latitude,
+            longitude,
+            city,
+            district
+            
+        -- 6. 그룹화된 '충전소'를 가까운 순으로 정렬합니다.
+        ORDER BY
+            distance_m;
+    </select>
+<!--    <select id="searchStations" parameterType="map" resultType="com.boot.Main_Page.dto.ElecDTO">-->
+<!--        SELECT -->
+<!--            id, installation_year, city, district, address,-->
+<!--            station_name, facility_type_large, facility_type_small,-->
+<!--            charger_model_large, charger_model_small, operator_large,-->
+<!--            operator_small, fast_charge_capacity, charger_type,-->
+<!--            user_restriction, latitude, longitude,-->
+            
+<!--            (6371000 * ACOS(COS(RADIANS(#{targetLat})) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(#{targetLng})) + -->
+<!--                           SIN(RADIANS(#{targetLat})) * SIN(RADIANS(latitude)))) AS distance_m-->
+                           
+<!--        FROM charging_stations-->
+        
+<!--        HAVING distance_m &lt;= #{radius}  ORDER BY distance_m-->
+<!--    </select>-->
 
 </mapper>

@@ -56,4 +56,15 @@ public class MemDAOImpl implements MemDAO {
 	public MemDTO findMemberBySocial(HashMap<String, String> param) {
 		return sqlSession.selectOne(NAMESPACE+".findMemberBySocial", param);
 	}
+
+	@Override
+	public MemDTO findUserByIdAndEmail(HashMap<String, String> param) {
+		return sqlSession.selectOne(NAMESPACE + ".findUserByIdAndEmail", param);
+	}
+
+	@Override
+	public void updatePassword(HashMap<String, String> param) {
+		sqlSession.update(NAMESPACE + ".updatePassword", param);
+		
+	}
 }
