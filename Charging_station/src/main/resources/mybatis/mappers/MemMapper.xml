@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.login.dao.MemDAO">
+
+    <!-- ✅ DTO 매핑 -->
+    <resultMap id="memResultMap" type="com.boot.login.dto.MemDTO">
+        <result property="memberId"     column="member_id"/>
+        <result property="name"         column="name"/>
+        <result property="password"     column="password"/>
+        <result property="nickname"     column="nickname"/>
+        <result property="email"        column="email"/>
+        <result property="phoneNumber"  column="phone_number"/>
+        <result property="birthdate"    column="birthdate"/>
+        <result property="joinDate"     column="join_date"/>
+        <result property="adminck"      column="admin_ck"/>
+        <result property="socialType"   column="social_type"/>
+        <result property="socialId"     column="social_id"/>
+    </resultMap>
+
+    <!-- ✅ 로그인 확인 -->
+    <select id="loginYn" parameterType="java.util.HashMap" resultMap="memResultMap">
+        SELECT *
+        FROM member_tb 
+        WHERE member_id = #{MEMBER_ID}
+          AND password = #{PASSWORD}
+    </select>
+    
+    <!-- ✅ 회원가입 -->
+    <insert id="write" parameterType="java.util.HashMap">
+        INSERT INTO member_tb (
+            member_id, name, password, nickname, email, 
+            phone_number, birthdate, admin_ck
+        ) VALUES (
+            #{MEMBER_ID}, #{NAME}, #{PASSWORD}, #{NICKNAME}, #{EMAIL},
+            #{PHONE_NUMBER}, #{BIRTHDATE}, IFNULL(#{ADMIN_CK}, 0)
+        )
+    </insert>
+
+    <!-- ✅ 회원 정보 조회 -->
+    <select id="getMemberInfo" parameterType="string" resultMap="memResultMap">
+        SELECT * 
+        FROM member_tb
+        WHERE member_id = #{id}
+    </select>
+
+    <!-- ✅ 아이디 중복 체크 -->
+    <select id="idCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE member_id = #{value}
+    </select>
+    
+    <!-- ✅ 닉네임 중복 체크 -->
+    <select id="nicknameCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE nickname = #{value}
+    </select>
+    
+    <!-- ✅ 이메일 중복 체크 -->
+    <select id="emailCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE email = #{value}
+    </select>
+    
+    <!-- ✅ 전화번호 중복 체크 -->
+    <select id="phoneCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE phone_number = #{value}
+    </select>
+
+</mapper>
