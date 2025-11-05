@@ -69,7 +69,7 @@ public class MemController {
             session.setAttribute("name", loginUser.getName());
             session.setAttribute("admin", loginUser.getAdminck());
 
-            return "redirect:/login_ok"; 
+            return "redirect:/map_kakao"; 
         }
     }
 
@@ -133,7 +133,7 @@ public class MemController {
         if (session != null) {
             session.invalidate();
         } 
-        return "redirect:/login";
+        return "redirect:/map_kakao";
     }
 
     // 구글 소셜 로그인 콜백

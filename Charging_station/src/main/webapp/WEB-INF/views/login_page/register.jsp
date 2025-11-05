@@ -5,6 +5,10 @@
 <meta charset="UTF-8">
 <title>회원가입</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="${pageContext.request.contextPath}/css/header.css" rel="stylesheet" type="text/css">
+	<link href="${pageContext.request.contextPath}/css/footer.css" rel="stylesheet" type="text/css">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
 <style>
 body {
     background-color: #f8f9fa;
@@ -20,6 +24,7 @@ body {
 </style>
 </head>
 <body>
+	<jsp:include page="/WEB-INF/views/common/header.jsp"/>
 
 <div class="container">
     <h2 class="text-center mb-4">회원가입</h2>
@@ -60,6 +65,6 @@ body {
         <a href="login">이미 계정이 있으신가요? 로그인</a>
     </div>
 </div>
-
+<jsp:include page="/WEB-INF/views/common/footer.jsp"/>
 </body>
 </html>

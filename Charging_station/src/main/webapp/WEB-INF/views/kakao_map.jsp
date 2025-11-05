@@ -2,164 +2,19 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.boot.Main_Page.dto.ElecDTO" %>
 <%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>다음 지도 API</title>
-    <style>
-        /* ▼▼▼ 2. CSS 스타일 (검색창 및 목록 스타일 추가) ▼▼▼ */
-        html, body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        /* 왼쪽 상세 패널 스타일 (기존 유지) */
-        #detail-panel {
-            position: absolute;
-            top: 50px; 
-            left: 0;
-            width: 300px; 
-            height: calc(100vh - 50px); 
-            background-color: white;
-            z-index: 1000; 
-            display: none; 
-            padding: 20px;
-            box-shadow: 3px 0 5px rgba(0,0,0,0.2); 
-            box-sizing: border-box; 
-            overflow-y: auto; 
-        }
-
-        /* 닫기 버튼 (detail_panel.jsp 안에 있는 버튼에 적용) */
-        #close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #555;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-        #close-btn:hover {
-            color: #000;
-        }
-
-        /* 내비게이션 바 스타일 (기존 유지) */
-        ul.main-nav { 
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #333;
-			height: 50px;
-			box-sizing: border-box;
-        }
-
-        ul.main-nav li {
-            float: left;
-        }
-
-        ul.main-nav li a {
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-
-        ul.main-nav li a:hover {
-            background-color: #111;
-        }
-
-        /* 검색창 컨테이너 스타일 */
-        #search-container {
-            position: absolute;
-            top: 60px; /* 네비게이션바 아래 */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1010; 
-            display: flex;
-            padding: 8px;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        #keyword {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            width: 250px;
-        }
-
-        #search-btn {
-            padding: 8px 15px;
-            margin-left: 5px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        #search-btn:hover {
-            background-color: #555;
-        }
-        
-        /* 목록 패널 스타일 */
-        #stations-list-panel {
-            position: absolute;
-            top: 120px; 
-            right: 20px;
-            width: 300px; 
-            height: calc(100vh - 140px); /* 전체 높이에서 상하 여백 제외 */
-            background-color: white;
-            z-index: 1000; 
-            padding: 10px;
-            box-shadow: -3px 0 5px rgba(0,0,0,0.2); 
-            box-sizing: border-box; 
-            overflow-y: auto; 
-            border-radius: 5px;
-            display: none; /* 검색 전에는 숨김 */
-        }
-
-        /* 목록 항목 스타일 */
-        .station-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-
-        .station-item:last-child {
-            border-bottom: none;
-        }
-
-        .station-item:hover {
-            background-color: #f7f7f7;
-        }
-
-        .station-item strong {
-            display: block;
-            font-size: 1.1em;
-            color: #333;
-        }
-
-        .station-item span {
-            font-size: 0.9em;
-            color: #777;
-        }
-
-    </style>
+	<link href="${pageContext.request.contextPath}/css/header.css" rel="stylesheet" type="text/css">
+	<link href="${pageContext.request.contextPath}/css/footer.css" rel="stylesheet" type="text/css">
 </head>
 <body>
     
     <%-- ▼▼▼ 3. HTML 본문 (검색 UI 유지) ▼▼▼ --%>
     
-    <jsp:include page="navigation_bar.jsp"/>
+    <jsp:include page="common/header.jsp"/>
 
     <jsp:include page="detail_panel.jsp"/>
     
@@ -382,5 +237,7 @@
         }; // 💡 window.onload 함수 끝
         
     </script>
+	<jsp:include page="common/footer.jsp"/>
+	
 </body>
 </html>
