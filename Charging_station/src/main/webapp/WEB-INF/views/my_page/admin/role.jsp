@@ -6,18 +6,38 @@
 <head>
     <meta charset="UTF-8">
     <title>관리자 | 전체 회원 목록 - 요리조리</title>
-    <!-- 부트스트랩 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 부트스트랩 아이콘 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+	<link href="${pageContext.request.contextPath}/css/header.css" rel="stylesheet" type="text/css">
+	<link href="${pageContext.request.contextPath}/css/footer.css" rel="stylesheet" type="text/css">
+		
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
     <style>
         /* 간단한 추가 스타일 */
         body {
             background-color: #f8f9fa;
+            /* [수정] body에 flex/height를 주면 
+               푸터가 이상하게 나올 수 있어 해당 스타일은 제거합니다. */
+        }
+        
+        /* [추가] 푸터가 하단에 붙도록 최소 높이 설정 */
+        html {
+            height: 100%;
+        }
+        body {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        /* [추가] 메인 콘텐츠 영역이 남은 공간을 채우도록 설정 */
+        .container {
+            flex-grow: 1;
         }
     </style>
 </head>
 <body>
+	<jsp:include page="/WEB-INF/views/common/header.jsp"/>
+
 
 <div class="container mt-5">
     <div class="row">
@@ -49,9 +69,8 @@
                                     <td>${user.name}</td>
                                     <td>${user.email}</td>
                                     <td>${user.phoneNumber}</td>
-                                    <td>${user.joinDate}</td> <!-- 생년월일보다 가입일이 더 유용할 수 있습니다. -->
+                                    <td>${user.joinDate}</td>
                                     <td>
-                                        <!-- ✅ [수정] 모달을 띄우는 버튼 -->
                                         <button type="button" class="btn btn-sm btn-danger delete-btn" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#deleteModal"
@@ -71,10 +90,6 @@
     </div>
 </div>
 
-<!-- 
-  ✅ [추가] 회원 삭제 확인 모달
-  confirm()을 대체하며, JavaScript로 대상 ID를 전달받습니다.
--->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -83,12 +98,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- JavaScript에 의해 내용이 채워집니다 -->
                 <p id="deleteModalText">정말 삭제하시겠습니까?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                <!-- 삭제를 실행할 폼 -->
                 <form action="delete2" method="post" style="margin:0;">
                     <input type="hidden" id="deleteMemberId" name="memberId" value="" />
                     <button type="submit" class="btn btn-danger">삭제 실행</button>
@@ -99,8 +112,33 @@
 </div>
 
 
-<!-- 부트스트랩 JS (모달 작동을 위해 필수) -->
+<jsp:include page="/WEB-INF/views/common/footer.jsp"/>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- ✅ [추가] 모달에 삭제할 ID를 전달하는 스크립트 -->
 <script>
+    // 부트스트랩 모달 이벤트 리스너
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        
+        // 모달을 연 버튼(삭제 버튼)을 가져옵니다.
+        var button = event.relatedTarget;
+        
+        // data-bs-* 속성에서 회원 ID와 닉네임을 추출합니다.
+        var memberId = button.getAttribute('data-bs-id');
+        var memberName = button.getAttribute('data-bs-name');
+
+        // 모달 내부의 텍스트 영역과 숨겨진 input을 찾습니다.
+        var modalText = deleteModal.querySelector('#deleteModalText');
+        var deleteInput = deleteModal.querySelector('#deleteMemberId');
+
+        // 모달 내용을 설정합니다.
+        modalText.textContent = '정말 "' + memberName + '" (ID: ' + memberId + ') 회원을 삭제하시겠습니까?';
+        
+        // 폼의 input(hidden)에 삭제할 ID 값을 설정합니다.
+        deleteInput.value = memberId;
+    });
+</script>
+
+</body>
+</html>
