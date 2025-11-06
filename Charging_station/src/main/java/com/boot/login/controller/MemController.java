@@ -41,6 +41,11 @@ public class MemController {
         log.info("@# GET /login");
         return "login_page/login"; 
     }
+    
+    @RequestMapping("/home")
+    public String home() {
+        return "home"; // home.jsp를 리턴
+    }
 
     // 로그인 확인
     @RequestMapping("/login_yn")
@@ -69,7 +74,8 @@ public class MemController {
             session.setAttribute("name", loginUser.getName());
             session.setAttribute("admin", loginUser.getAdminck());
 
-            return "redirect:/login_ok"; 
+//            return "redirect:/map_kakao"; 
+            return "redirect:/home"; 
         }
     }
 
@@ -123,7 +129,7 @@ public class MemController {
         session.setAttribute("name", param.get("NAME"));
         session.setAttribute("admin", 0); 
         
-        return "redirect:/home"; // 회원가입 성공 시 이동할 페이지
+        return "redirect:/map_kakao"; // 회원가입 성공 시 이동할 페이지
     }
 
     @RequestMapping("/logout")
@@ -133,7 +139,7 @@ public class MemController {
         if (session != null) {
             session.invalidate();
         } 
-        return "redirect:/login";
+        return "redirect:/map_kakao";
     }
 
     // 구글 소셜 로그인 콜백
@@ -170,7 +176,7 @@ public class MemController {
             session.setAttribute("name", socialMember.getName());
             session.setAttribute("admin", socialMember.getAdminck());
 
-            return "redirect:/login_ok";
+            return "redirect:/map_kakao";
 
         } catch (Exception e) {
             log.error("@# 구글 로그인 처리 중 예외 발생: {}", e.getMessage());
@@ -230,7 +236,7 @@ public class MemController {
                 message.setTo(email); // 수신자 이메일
                 
                 // [!!] application.properties의 spring.mail.username과 동일한 이메일
-                message.setFrom("your_emai@gmail.com"); 
+                message.setFrom("@gmail.com"); 
                 message.setSubject("[임시 비밀번호 안내] 요청하신 임시 비밀번호입니다."); // 메일 제목
                 
                 String mailText = "요청하신 임시 비밀번호입니다.\n\n"
