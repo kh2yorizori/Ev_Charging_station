@@ -16,4 +16,9 @@ public interface MemDAO {
     int nicknameCheck(String nickname);
     int emailCheck(String email);
     int phoneCheck(String phoneNumber);
+
+    //소셜 로그인 메소드
+    MemDTO findMemberBySocial(HashMap<String, String> param);
+	MemDTO findUserByIdAndEmail(HashMap<String, String> param);
+	void updatePassword(HashMap<String, String> param);
 }

@@ -17,4 +17,7 @@ public class MemDTO {
     private int adminck;          // 관리자 여부 (0=일반, 1=관리자)
     private String socialType;    // 소셜 로그인 타입 (예: google, kakao 등)
     private String socialId;      // 소셜 로그인 ID
+    
+    
+    
 }
