@@ -155,7 +155,7 @@
         
             <div class="divider"><span>OR</span></div>
         
-			<a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=461483322193-krdf6oc8alee5hsnqlcp9tca8nr8qql2.apps.googleusercontent.com&redirect_uri=http://localhost:8484/login/oauth2/code/google&response_type=code&scope=profile email openid" 
+			<a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=[추가해야함]&redirect_uri=http://localhost:8484/login/oauth2/code/google&response_type=code&scope=profile email openid" 
  
                class="google-login-btn">
                 <img src="https://img1.daumcdn.net/thumb/R1280x0.fwebp/?fname=http://t1.daumcdn.net/brunch/service/user/5rH/image/LHUiJV1nog0BqnOJ8Mtj5UbNTjQ" alt="Google logo">

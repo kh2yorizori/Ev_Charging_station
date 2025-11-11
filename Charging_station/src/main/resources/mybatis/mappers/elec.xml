@@ -26,6 +26,15 @@
         <result property="charger_count" column="charger_count"/>
         <result property="fast_charger_count" column="fast_charger_count"/>
         <result property="slow_charger_count" column="slow_charger_count"/>
+        
+        <result property="fast_type_dc_combo" column="fast_type_dc_combo"/>
+        <result property="fast_type_dc_chademo" column="fast_type_dc_chademo"/>
+        <result property="fast_type_multi_1" column="fast_type_multi_1"/>
+        <result property="fast_type_multi_2" column="fast_type_multi_2"/>
+        <result property="fast_type_multi_3" column="fast_type_multi_3"/>
+        <result property="slow_type_ac3" column="slow_type_ac3"/>
+        <result property="slow_type_ac_slow" column="slow_type_ac_slow"/>
+        <result property="slow_type_dc_slow" column="slow_type_dc_slow"/>
     </resultMap>
     
     <select id="searchByRadius" parameterType="map" resultMap="elecResultMap">
@@ -64,7 +73,15 @@
                     'DC콤보(완속)'
                 ) THEN 1 
                 ELSE 0 
-            END) AS slow_charger_count
+            END) AS slow_charger_count,
+            SUM(CASE WHEN charger_type = 'DC콤보' THEN 1 ELSE 0 END) AS fast_type_dc_combo,
+            SUM(CASE WHEN charger_type = 'DC차데모' THEN 1 ELSE 0 END) AS fast_type_dc_chademo,
+            SUM(CASE WHEN charger_type = 'DC차데모+AC3상+DC콤보' THEN 1 ELSE 0 END) AS fast_type_multi_1,
+            SUM(CASE WHEN charger_type = 'DC차데모+DC콤보' THEN 1 ELSE 0 END) AS fast_type_multi_2,
+            SUM(CASE WHEN charger_type = 'DC차데모+AC3상' THEN 1 ELSE 0 END) AS fast_type_multi_3,
+            SUM(CASE WHEN charger_type = 'AC3상' THEN 1 ELSE 0 END) AS slow_type_ac3,
+            SUM(CASE WHEN charger_type = 'AC완속' THEN 1 ELSE 0 END) AS slow_type_ac_slow,
+            SUM(CASE WHEN charger_type = 'DC콤보(완속)' THEN 1 ELSE 0 END) AS slow_type_dc_slow
             
         FROM (
             SELECT 
@@ -115,7 +132,15 @@
                     'DC콤보(완속)'
                 ) THEN 1 
                 ELSE 0 
-            END) AS slow_charger_count
+            END) AS slow_charger_count,
+            SUM(CASE WHEN charger_type = 'DC콤보' THEN 1 ELSE 0 END) AS fast_type_dc_combo,
+            SUM(CASE WHEN charger_type = 'DC차데모' THEN 1 ELSE 0 END) AS fast_type_dc_chademo,
+            SUM(CASE WHEN charger_type = 'DC차데모+AC3상+DC콤보' THEN 1 ELSE 0 END) AS fast_type_multi_1,
+            SUM(CASE WHEN charger_type = 'DC차데모+DC콤보' THEN 1 ELSE 0 END) AS fast_type_multi_2,
+            SUM(CASE WHEN charger_type = 'DC차데모+AC3상' THEN 1 ELSE 0 END) AS fast_type_multi_3,
+            SUM(CASE WHEN charger_type = 'AC3상' THEN 1 ELSE 0 END) AS slow_type_ac3,
+            SUM(CASE WHEN charger_type = 'AC완속' THEN 1 ELSE 0 END) AS slow_type_ac_slow,
+            SUM(CASE WHEN charger_type = 'DC콤보(완속)' THEN 1 ELSE 0 END) AS slow_type_dc_slow
             
         FROM 
             charging_stations
@@ -161,7 +186,15 @@
                     'DC콤보(완속)'
                 ) THEN 1 
                 ELSE 0 
-            END) AS slow_charger_count
+            END) AS slow_charger_count,
+            SUM(CASE WHEN charger_type = 'DC콤보' THEN 1 ELSE 0 END) AS fast_type_dc_combo,
+            SUM(CASE WHEN charger_type = 'DC차데모' THEN 1 ELSE 0 END) AS fast_type_dc_chademo,
+            SUM(CASE WHEN charger_type = 'DC차데모+AC3상+DC콤보' THEN 1 ELSE 0 END) AS fast_type_multi_1,
+            SUM(CASE WHEN charger_type = 'DC차데모+DC콤보' THEN 1 ELSE 0 END) AS fast_type_multi_2,
+            SUM(CASE WHEN charger_type = 'DC차데모+AC3상' THEN 1 ELSE 0 END) AS fast_type_multi_3,
+            SUM(CASE WHEN charger_type = 'AC3상' THEN 1 ELSE 0 END) AS slow_type_ac3,
+            SUM(CASE WHEN charger_type = 'AC완속' THEN 1 ELSE 0 END) AS slow_type_ac_slow,
+            SUM(CASE WHEN charger_type = 'DC콤보(완속)' THEN 1 ELSE 0 END) AS slow_type_dc_slow
             
         FROM 
             charging_stations

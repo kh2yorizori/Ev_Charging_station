@@ -129,7 +129,7 @@ public class MemController {
         session.setAttribute("name", param.get("NAME"));
         session.setAttribute("admin", 0); 
         
-        return "redirect:/map_kakao"; // 회원가입 성공 시 이동할 페이지
+        return "redirect:/home"; // 회원가입 성공 시 이동할 페이지
     }
 
     @RequestMapping("/logout")
@@ -139,7 +139,7 @@ public class MemController {
         if (session != null) {
             session.invalidate();
         } 
-        return "redirect:/map_kakao";
+        return "redirect:/home";
     }
 
     // 구글 소셜 로그인 콜백
@@ -236,7 +236,7 @@ public class MemController {
                 message.setTo(email); // 수신자 이메일
                 
                 // [!!] application.properties의 spring.mail.username과 동일한 이메일
-                message.setFrom("@gmail.com"); 
+                message.setFrom("sonjy123036@gmail.com"); 
                 message.setSubject("[임시 비밀번호 안내] 요청하신 임시 비밀번호입니다."); // 메일 제목
                 
                 String mailText = "요청하신 임시 비밀번호입니다.\n\n"
