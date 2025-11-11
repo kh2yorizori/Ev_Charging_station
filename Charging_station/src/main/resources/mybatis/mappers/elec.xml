@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.Main_Page.dao.ElecDAO">
+
+    <resultMap id="elecResultMap" type="com.boot.Main_Page.dto.ElecDTO">
+        <result property="id" column="id"/>
+        <result property="installation_year" column="installation_year"/>
+        <result property="city" column="city"/>
+        <result property="district" column="district"/>
+        <result property="address" column="address"/>
+        <result property="station_name" column="station_name"/>
+        <result property="facility_type_large" column="facility_type_large"/>
+        <result property="facility_type_small" column="facility_type_small"/>
+        <result property="charger_model_large" column="charger_model_large"/>
+        <result property="charger_model_small" column="charger_model_small"/>
+        <result property="operator_large" column="operator_large"/>
+        <result property="operator_small" column="operator_small"/>
+        <result property="fast_charge_capacity" column="fast_charge_capacity"/>
+        <result property="user_restriction" column="user_restriction"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="distance_m" column="distance_m"/>
+        <result property="charger_count" column="charger_count"/>
+        <result property="fast_charger_count" column="fast_charger_count"/>
+        <result property="slow_charger_count" column="slow_charger_count"/>
+    </resultMap>
+    
+    <select id="searchByRadius" parameterType="map" resultMap="elecResultMap">
+        SELECT
+            station_name, address, latitude, longitude, city, district,
+            MIN(id) AS id, 
+            MIN(installation_year) AS installation_year,
+            MIN(facility_type_large) AS facility_type_large,
+            MIN(facility_type_small) AS facility_type_small,
+            MIN(charger_model_large) AS charger_model_large,
+            MIN(operator_large) AS operator_large,
+            MIN(operator_small) AS operator_small,
+            MIN(user_restriction) AS user_restriction,
+            GROUP_CONCAT(DISTINCT charger_model_small SEPARATOR ', ') AS charger_model_small,
+            GROUP_CONCAT(DISTINCT fast_charge_capacity SEPARATOR ', ') AS fast_charge_capacity,
+            
+            -- 총 충전기 개수 (유지)
+            COUNT(*) AS charger_count,
+            MIN(distance_m) AS distance_m,
+
+            SUM(CASE 
+                WHEN charger_type IN (
+                    'DC콤보', 
+                    'DC차데모', 
+                    'DC차데모+AC3상+DC콤보', 
+                    'DC차데모+DC콤보', 
+                    'DC차데모+AC3상'
+                ) THEN 1 
+                ELSE 0 
+            END) AS fast_charger_count,
+
+            SUM(CASE 
+                WHEN charger_type IN (
+                    'AC3상', 
+                    'AC완속', 
+                    'DC콤보(완속)'
+                ) THEN 1 
+                ELSE 0 
+            END) AS slow_charger_count
+            
+        FROM (
+            SELECT 
+                *,
+                (9556500 * ACOS(COS(RADIANS(#{targetLat})) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(#{targetLng})) + 
+                               SIN(RADIANS(#{targetLat})) * SIN(RADIANS(latitude)))) AS distance_m
+            FROM charging_stations  
+            HAVING distance_m &lt;= #{radius}
+        ) AS NearbyChargers
+        GROUP BY
+            station_name, address, latitude, longitude, city, district
+        ORDER BY
+            distance_m;
+    </select>
+
+    <select id="searchByKeyword" parameterType="map" resultMap="elecResultMap">
+        SELECT
+            station_name, address, latitude, longitude, city, district,
+            MIN(id) AS id, 
+            MIN(installation_year) AS installation_year,
+            MIN(facility_type_large) AS facility_type_large,
+            MIN(facility_type_small) AS facility_type_small,
+            MIN(charger_model_large) AS charger_model_large,
+            MIN(operator_large) AS operator_large,
+            MIN(operator_small) AS operator_small,
+            MIN(user_restriction) AS user_restriction,
+            GROUP_CONCAT(DISTINCT charger_model_small SEPARATOR ', ') AS charger_model_small,
+            GROUP_CONCAT(DISTINCT fast_charge_capacity SEPARATOR ', ') AS fast_charge_capacity,
+            
+            -- 총 충전기 개수 (유지)
+            COUNT(*) AS charger_count,
+
+            SUM(CASE 
+                WHEN charger_type IN (
+                    'DC콤보', 
+                    'DC차데모', 
+                    'DC차데모+AC3상+DC콤보', 
+                    'DC차데모+DC콤보', 
+                    'DC차데모+AC3상'
+                ) THEN 1 
+                ELSE 0 
+            END) AS fast_charger_count,
+
+            SUM(CASE 
+                WHEN charger_type IN (
+                    'AC3상', 
+                    'AC완속', 
+                    'DC콤보(완속)'
+                ) THEN 1 
+                ELSE 0 
+            END) AS slow_charger_count
+            
+        FROM 
+            charging_stations
+        WHERE
+            station_name LIKE CONCAT('%', #{keyword}, '%')
+            OR address LIKE CONCAT('%', #{keyword}, '%')
+        GROUP BY
+            station_name, address, latitude, longitude, city, district
+        LIMIT 50;
+    </select>
+    
+	<select id="searchByBounds" parameterType="map" resultMap="elecResultMap">
+        SELECT
+            station_name, address, latitude, longitude, city, district,
+            MIN(id) AS id, 
+            MIN(installation_year) AS installation_year,
+            MIN(facility_type_large) AS facility_type_large,
+            MIN(facility_type_small) AS facility_type_small,
+            MIN(charger_model_large) AS charger_model_large,
+            MIN(operator_large) AS operator_large,
+            MIN(operator_small) AS operator_small,
+            MIN(user_restriction) AS user_restriction,
+            GROUP_CONCAT(DISTINCT charger_model_small SEPARATOR ', ') AS charger_model_small,
+            GROUP_CONCAT(DISTINCT fast_charge_capacity SEPARATOR ', ') AS fast_charge_capacity,
+            
+            COUNT(*) AS charger_count,
+
+            SUM(CASE 
+                WHEN charger_type IN (
+                    'DC콤보', 
+                    'DC차데모', 
+                    'DC차데모+AC3상+DC콤보', 
+                    'DC차데모+DC콤보', 
+                    'DC차데모+AC3상'
+                ) THEN 1 
+                ELSE 0 
+            END) AS fast_charger_count,
+
+            SUM(CASE 
+                WHEN charger_type IN (
+                    'AC3상', 
+                    'AC완속', 
+                    'DC콤보(완속)'
+                ) THEN 1 
+                ELSE 0 
+            END) AS slow_charger_count
+            
+        FROM 
+            charging_stations
+        WHERE
+            latitude BETWEEN #{minLat} AND #{maxLat}
+            AND longitude BETWEEN #{minLng} AND #{maxLng}
+        GROUP BY
+            station_name, address, latitude, longitude, city, district;
+    </select>
+
+</mapper>
