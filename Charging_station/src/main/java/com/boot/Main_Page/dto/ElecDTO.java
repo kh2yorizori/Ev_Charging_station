@@ -49,4 +49,23 @@ public class ElecDTO {
      */
     private int slow_charger_count;
     
+    
+    /** [추가] 급속 충전기 상세_DC콤보 */
+    private int fast_type_dc_combo;
+    /** [추가] 급속 충전기 상세_DC차데모 */
+    private int fast_type_dc_chademo;
+    /** [추가] 급속 충전기 상세_DC차데모+AC3상+DC콤보 */
+    private int fast_type_multi_1;
+    /** [추가] 급속 충전기 상세_DC차데모+DC콤보 */
+    private int fast_type_multi_2;
+    /** [추가] 급속 충전기 상세_DC차데모+AC3상 */
+    private int fast_type_multi_3;
+
+    /** [추가] 완속 충전기 상세_AC3상 */
+    private int slow_type_ac3;
+    /** [추가] 완속 충전기 상세_AC완속 */
+    private int slow_type_ac_slow;
+    /** [추가] 완속 충전기 상세_DC콤보(완속) */
+    private int slow_type_dc_slow;
+    
 }

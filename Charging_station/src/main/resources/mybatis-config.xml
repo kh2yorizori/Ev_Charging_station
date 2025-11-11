@@ -9,6 +9,8 @@
 		<mapper resource="mybatis/mappers/elec.xml"/>
 		<mapper resource="mybatis/mappers/NoticeMapper.xml"/>
 		<mapper resource="mybatis/mappers/Favorite.xml"/>
+		<mapper resource="mybatis/mappers/BoardMapper.xml"/>
+		<mapper resource="mybatis/mappers/BoardCommentMapper.xml"/>
 	</mappers>
 </configuration>
 

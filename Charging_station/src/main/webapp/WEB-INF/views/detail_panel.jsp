@@ -287,6 +287,101 @@
     #charger_type {
         display: none;
     }
+
+
+
+    /* 길찾기 버튼 스타일 */
+#detail-panel .action-buttons {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #f0f0f0;
+        
+        /* 💡 [추가] 버튼 2개를 가로/중앙으로 배치 */
+        display: flex;
+        justify-content: center;
+        gap: 12px; /* 버튼 사이 간격 */
+    }
+    #detail-panel .navi-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #FEE500;
+        color: #181600;
+        font-size: 1em;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #detail-panel .navi-btn:hover {
+        background-color: #F7E000;
+    }
+
+    /* 💡 [추가] 로드뷰 버튼 스타일 (navi-btn과 유사하게) */
+    #detail-panel .roadview-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff; /* 카카오맵과 비슷한 파란색 계열 */
+        color: white;
+        font-size: 1em;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #detail-panel .roadview-btn:hover {
+        background-color: #0056b3;
+    }
+
+
+
+/* 💡 [수정] 새로운 카드 디자인에 클릭/호버 효과 적용 */
+.charger-card.clickable {
+    cursor: pointer;
+    /* transition은 이미 .charger-card에 있습니다 */
+}
+.charger-card.clickable:hover {
+    /* 이미 :hover 스타일이 있지만, 클릭 가능하다는 것을 강조하기 위해 border 색상 변경 */
+    border-color: #52c41a; 
+}
+
+/* 💡 [수정] 상세 충전기 목록 스타일 (카드 내부에 맞게) */
+.charger-details-list {
+    display: none; /* 💡 평소엔 숨김 */
+    list-style: none;
+    padding: 12px 0 0 0;
+    margin: 12px 0 0 0;
+    border-top: 1px solid #e9ecef; /* 카드 내부 구분선 */
+    font-size: 14px;
+    text-align: left; /* 💡 카드(center)와 달리 좌측 정렬 */
+}
+.charger-details-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0; /* 💡 좌우 패딩 제거 (카드 패딩 사용) */
+}
+.charger-details-list li span:first-child {
+    color: #555; /* 타입 이름 */
+}
+.charger-details-list li span:last-child {
+    font-weight: 600; /* 개수 */
+    color: #333;
+}
+
+/* 💡 [추가] 노란색 뱃지 (이용자제한) */
+.restriction-badge.badge-yellow {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 213, 79, 0.1) 100%);
+    border-color: rgba(255, 193, 7, 0.3);
+    color: #e6a800;
+}
+
+/* 💡 [추가] 빨간색 뱃지 (비공개) */
+.restriction-badge.badge-red {
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(255, 138, 128, 0.1) 100%);
+    border-color: rgba(244, 67, 54, 0.3);
+    color: #d93025;
+}
 </style>
 
 <div id="detail-panel">
@@ -303,23 +398,31 @@
 
     <div class="detail-content">
         
-        <div class="status-section">
-            <div class="section-title">⚡ 충전기 현황</div>
-            <div class="charger-cards">
-                <div class="charger-card fast">
-                    <span class="charger-icon">⚡</span>
-                    <div class="charger-type">급속</div>
-                    <div id="fast-charger-count" class="charger-count">0</div>
-                    <div class="charger-label">대</div>
-                </div>
-                <div class="charger-card slow">
-                    <span class="charger-icon">🔌</span>
-                    <div class="charger-type">완속</div>
-                    <div id="slow-charger-count" class="charger-count">0</div>
-                    <div class="charger-label">대</div>
-                </div>
+<div class="status-section">
+        <div class="section-title">⚡ 충전기 현황</div>
+        <div class="charger-cards">
+            
+            <div class="charger-card fast clickable" id="fast-charger-toggle" data-target="#fast-details-list">
+                <span class="charger-icon">⚡</span>
+                <div class="charger-type">급속</div>
+                <div id="fast-charger-count" class="charger-count">0</div>
+                <div class="charger-label">대</div>
+                
+                <ul class="charger-details-list" id="fast-details-list">
+                    </ul>
+            </div>
+            
+            <div class="charger-card slow clickable" id="slow-charger-toggle" data-target="#slow-details-list">
+                <span class="charger-icon">🔌</span>
+                <div class="charger-type">완속</div>
+                <div id="slow-charger-count" class="charger-count">0</div>
+                <div class="charger-label">대</div>
+                
+                <ul class="charger-details-list" id="slow-details-list">
+                    </ul>
             </div>
         </div>
+    </div>
 
         <div class="divider"></div>
 
@@ -352,6 +455,17 @@
     <input type="hidden" id="current-station-id" value=""> 
 
     <div id="other-details"></div>
+
+    <div class="action-buttons">
+        <a id="navi-link" href="#" target="_blank" class="navi-btn">
+            카카오맵으로 길찾기
+        </a>
+
+        <a id="roadview-link" href="#" target="_blank" class="roadview-btn">
+            로드뷰 보기
+        </a>
+    </div>
+    
 </div>
 
 <script>

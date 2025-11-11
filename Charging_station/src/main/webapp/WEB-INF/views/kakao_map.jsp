@@ -170,13 +170,34 @@
             margin: 0;
             padding: 20px 20px 16px;
             display: flex;
-            justify-content: flex-start; /* X 버튼 제거로 수정 */
-            align-items: center;
+            justify-content: space-between; /* 💡 'flex-start'에서 'space-between'으로 변경 */
+            align-items: center;         /* 💡 수직 중앙 정렬 */
             font-size: 18px;
             font-weight: 700;
             color: #333;
             background: #f8f9fa;
             border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* 2. 이 스타일을 <style> 태그 하단에 새로 추가하세요. */
+        #filter-available-container {
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        #filter-available-container input[type="checkbox"] {
+            margin-right: 6px;
+            width: 15px;
+            height: 15px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+        #filter-available-container label {
+            margin-bottom: 0; /* Bootstrap CSS와 충돌 방지 */
+            cursor: pointer;
+            user-select: none; /* 글자 선택 방지 */
         }
 
 
@@ -358,6 +379,34 @@
                 left: 20px;
             }
         }
+
+
+        /* 💡 [추가] 현재 위치 버튼 스타일 */
+        #my-location-btn-container {
+            position: absolute;
+            top: 140px; /* 맵 컨트롤(MapTypeControl) 바로 아래 */
+            right: 45px;
+            z-index: 1010;
+        }
+        #my-location-btn {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #555;
+            transition: all 0.2s ease;
+        }
+        #my-location-btn:hover {
+            background: #f9f9f9;
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -379,9 +428,20 @@
         <div id="stations-list-panel">
             <h3>
                 <span>🔎 검색 결과</span>
-                </h3>
+                
+                <div id="filter-available-container">
+                    <input type="checkbox" id="available-only-toggle">
+                    <label for="available-only-toggle">이용 가능만 보기</label>
+                </div>
+            </h3>
             <div id="stations-list"></div>
         </div>
+    </div>
+
+    <div id="my-location-btn-container">
+        <button id="my-location-btn" title="현재 내 위치로 이동">
+            <i class="fa fa-crosshairs"></i>
+        </button>
     </div>
 
     <div id="search-bounds-btn-container">
@@ -394,7 +454,7 @@
     <div id="map"></div>
 
     <%-- (주의) appkey는 본인의 키로, libraries=services가 포함되어야 합니다 --%>
-    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=[id]&libraries=services"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0&libraries=services,clusterer"></script>
     
     <script>
     var map; 
@@ -402,7 +462,13 @@
     var stationsListEl; // 전역 선언
     var stationsListPanel; // 전역 선언
     var activeStationItem = null; 
+    var availableOnlyToggle = null;
+
+    var selectedMarker = null; // 💡 [추가] 1. 전역 변수로 이동
+    var selectedMarkerImage = null; // 💡 [추가] 2. 전역 변수로 추가
     
+    var markerClusterer = null; // 💡 [추가] 클러스터러 객체를 담을 변수
+
     // 🌟 상수 정의
     const DEFAULT_TOGGLE_LEFT = '424px'; // 400px (사이드바) + 24px (간격)
     const DETAIL_OPEN_TOGGLE_LEFT = '828px'; // 444px (상세 시작) + 380px (상세 너비) + 4px (간격)
@@ -455,6 +521,12 @@
             item.appendChild(nameEl);
             item.appendChild(addressEl);
 
+            // 💡 [수정] 필터링을 위한 데이터 저장 및 객체 연결
+            // 1. 원본 데이터 저장 (null, "" 이면 "정보 없음"으로 통일)
+            item.dataset.userRestriction = station.user_restriction || '정보 없음'; 
+            // 2. 아이템에 마커 연결
+            item.linkedMarker = marker;
+
             // 마커 클릭 이벤트 및 목록 항목 클릭 핸들러
             var clickHandler = function() {
                  // 이전 활성화 항목 스타일 제거
@@ -466,12 +538,37 @@
                 item.classList.add('active');
                 activeStationItem = item;
 
+                // 💡 [추가] 마커 이미지 변경 로직
+                // 1. 이전에 선택된 마커가 있다면, 기본(파란색) 이미지로 되돌림
+                if (selectedMarker) {
+                    selectedMarker.setImage(null);
+                }
+                // 2. 현재 클릭된 마커를 노란색 이미지로 변경
+                marker.setImage(selectedMarkerImage);
+                // 3. 현재 마커를 '선택된 마커'로 저장
+                selectedMarker = marker;
+
                 stationNameEl.textContent = station.station_name;
                 stationAddressEl.textContent = station.address;
-                operator_large.textContent = (station.operator_large ? "운영기관: " : "") + (station.operator_large || '-');
-                operator_small.textContent = (station.operator_small ? "운영기관(상세): " : "") + (station.operator_small || '-');
+                operator_large.textContent = station.operator_large
+                operator_small.textContent = (station.operator_small || '-');
                 user_restriction.textContent = (station.user_restriction ? "" : "이용 제한: ") + (station.user_restriction || '정보 없음');
-                facility_type_large.textContent = (station.facility_type_large ? "시설 구분: " : "") + (station.facility_type_large || '-');
+                facility_type_large.textContent =(station.facility_type_large || '-');
+
+                // 💡 [수정] 이용 제한 텍스트 및 뱃지 클래스 변경
+                var restrictionText = station.user_restriction || '정보 없음';
+                    // 1. 텍스트 설정
+                user_restriction.textContent = restrictionText;
+                
+                // 2. 클래스 초기화 (기본은 녹색)
+                user_restriction.classList.remove('badge-yellow', 'badge-red');
+                
+                // 3. 조건에 따라 클래스 추가
+                if (restrictionText === '이용자제한') {
+                    user_restriction.classList.add('badge-yellow');
+                } else if (restrictionText === '비공개') {
+                    user_restriction.classList.add('badge-red');
+                }
 
                 // DTO에서 급속/완속 개수를 직접 가져옴
                 var fastChargers = station.fast_charger_count || 0;
@@ -487,6 +584,29 @@
                     slowEl.textContent = slowChargers; // 숫자만 표시하도록 수정
                 }
                 
+                // 💡 [추가] 상세 목록 HTML 생성
+                var fastDetailsList = document.getElementById('fast-details-list');
+                var slowDetailsList = document.getElementById('slow-details-list');
+                
+                var fastHtml = '';
+                if (station.fast_type_dc_combo > 0) fastHtml += '<li><span>DC콤보</span><span>' + station.fast_type_dc_combo + '기</span></li>';
+                if (station.fast_type_dc_chademo > 0) fastHtml += '<li><span>DC차데모</span><span>' + station.fast_type_dc_chademo + '기</span></li>';
+                if (station.fast_type_multi_1 > 0) fastHtml += '<li><span>DC차데모+AC3상+DC콤보</span><span>' + station.fast_type_multi_1 + '기</span></li>';
+                if (station.fast_type_multi_2 > 0) fastHtml += '<li><span>DC차데모+DC콤보</span><span>' + station.fast_type_multi_2 + '기</span></li>';
+                if (station.fast_type_multi_3 > 0) fastHtml += '<li><span>DC차데모+AC3상</span><span>' + station.fast_type_multi_3 + '기</span></li>';
+                
+                var slowHtml = '';
+                if (station.slow_type_ac3 > 0) slowHtml += '<li><span>AC3상</span><span>' + station.slow_type_ac3 + '기</span></li>';
+                if (station.slow_type_ac_slow > 0) slowHtml += '<li><span>AC완속</span><span>' + station.slow_type_ac_slow + '기</span></li>';
+                if (station.slow_type_dc_slow > 0) slowHtml += '<li><span>DC콤보(완속)</span><span>' + station.slow_type_dc_slow + '기</span></li>';
+
+                fastDetailsList.innerHTML = fastHtml;
+                slowDetailsList.innerHTML = slowHtml;
+
+                // 💡 [추가] 목록이 비어있으면 숨기기 (토글 전 초기화)
+                fastDetailsList.style.display = 'none';
+                slowDetailsList.style.display = 'none';
+
                 // 즐겨찾기 ID 설정 함수 호출 (detail_panel.jsp에 정의됨)
                 if (typeof setStationIdAndCheckFavorite === 'function') {
                     setStationIdAndCheckFavorite(station.id);
@@ -512,6 +632,19 @@
                 if (toggleContainer) {
                     toggleContainer.style.left = DETAIL_OPEN_TOGGLE_LEFT; // ⬅️ 828px로 이동
                     toggleContainer.title = "사이드바 숨기기"; 
+                }
+
+                // 💡 [추가] 1. 길찾기 버튼 링크 설정 (이 코드가 누락됨)
+                var naviLink = document.getElementById('navi-link');
+                if (naviLink) {
+                    var stationName = encodeURIComponent(station.station_name); 
+                    naviLink.href = 'https://map.kakao.com/link/to/' + stationName + ',' + station.latitude + ',' + station.longitude;
+                }
+
+                // 💡 [추가] 5. 로드뷰 버튼 링크 설정
+                var roadviewLink = document.getElementById('roadview-link');
+                if (roadviewLink) {
+                    roadviewLink.href = 'https://map.kakao.com/link/roadview/' + station.latitude + ',' + station.longitude;
                 }
             };
 
@@ -566,6 +699,12 @@
         
         if (panel) {
             panel.style.display = 'none';
+
+            // 💡 [추가] 선택된 마커 초기화
+            if (selectedMarker) {
+                selectedMarker.setImage(null);
+                selectedMarker = null;
+            }
         }
         
         // 🌟 [수정] 목록이 새로 열리면 사이드바 상태 복구
@@ -631,6 +770,18 @@
             }; 
         map = new kakao.maps.Map(mapContainer, mapOption); // 전역 변수 초기화
 
+
+
+        // 💡 [추가] 2. 노란색 마커 이미지 객체 생성
+        var imageSrc = '${pageContext.request.contextPath}/image/sel_marker_yellow_small.png'; // 💡 새 이름
+        var imageSize = new kakao.maps.Size(38, 50); // 💡 새 크기
+        var imageOption = { offset: new kakao.maps.Point(14, 39) }; // 💡 새 오프셋
+    
+        selectedMarkerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
+
+        // 💡 [추가] 이 객체가 잘 생성되었는지 콘솔에 찍어봅니다.
+        console.log("노란색 마커 이미지 객체:", selectedMarkerImage);
+
         var mapTypeControl = new kakao.maps.MapTypeControl();
         map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
         var zoomControl = new kakao.maps.ZoomControl();
@@ -641,6 +792,8 @@
         var keywordEl = document.getElementById('keyword');
         var searchBtn = document.getElementById('search-btn');
         var searchBoundsBtn = document.getElementById('search-bounds-btn'); 
+
+        var myLocationBtn = document.getElementById('my-location-btn'); // 💡 [추가]
         
         // 🌟 전역 변수 초기화
         stationsListPanel = document.getElementById('stations-list-panel'); 
@@ -648,6 +801,81 @@
         
         var panel = document.getElementById('detail-panel');
         var closeBtn = document.getElementById('close-btn');
+
+        // 💡 [추가] 급속/완속 상세 목록 토글 이벤트
+        var fastToggle = document.getElementById('fast-charger-toggle');
+        var slowToggle = document.getElementById('slow-charger-toggle');
+
+        // 💡 [수정] 필터 체크박스 초기화 및 이벤트 리스너 (로직 수정됨)
+        availableOnlyToggle = document.getElementById('available-only-toggle');
+        
+        if (availableOnlyToggle) {
+            availableOnlyToggle.addEventListener('change', function() {
+                var isChecked = this.checked;
+                var allItems = stationsListEl.querySelectorAll('.station-item');
+                
+                // 필터링 시 활성화된 항목 및 상세 패널 초기화
+                if (activeStationItem) {
+                    activeStationItem.classList.remove('active');
+                    activeStationItem = null;
+                    document.getElementById('detail-panel').style.display = 'none';
+                    
+                    var toggleContainer = document.getElementById('toggle-sidebar-btn-container');
+                    if (toggleContainer) {
+                        toggleContainer.style.left = DEFAULT_TOGGLE_LEFT;
+                    }
+
+                    // 💡 [추가] 선택된 마커 초기화
+                    if (selectedMarker) {
+                        selectedMarker.setImage(null);
+                        selectedMarker = null;
+                    }
+                }
+
+                allItems.forEach(function(item) {
+                    var restriction = item.dataset.userRestriction;
+                    
+                    // 💡 [수정] "이용 가능" 또는 "정보 없음"을 '이용 가능'으로 간주
+                    var isAvailable = (restriction === '이용가능' || restriction === '정보 없음'); 
+                    
+                    var marker = item.linkedMarker;
+
+                    if (isChecked) { // 1. "이용 가능만" 체크 시
+                        if (isAvailable) {
+                            item.style.display = ''; // 💡 'block' 대신 '' 로 수정 (안전)
+                            if (marker) marker.setMap(map);
+                        } else {
+                            item.style.display = 'none';
+                            if (marker) marker.setMap(null);
+                        }
+                    } else { // 2. "이용 가능만" 체크 해제 시 (모두 보기)
+                        item.style.display = ''; // 💡 'block' 대신 '' 로 수정 (안전)
+                        if (marker) marker.setMap(map);
+                    }
+                });
+            });
+        }
+
+        // 헬퍼 함수
+        function setupToggle(toggleButton) {
+            toggleButton.addEventListener('click', function(e) {
+                // 텍스트 선택 등 방지
+                e.stopPropagation(); 
+                var targetList = document.querySelector(toggleButton.dataset.target);
+                
+                if (targetList) {
+                    // 목록에 내용이 있을 때(빈 문자열이 아닐 때)만 토글 실행
+                    if (targetList.innerHTML.trim() !== "") {
+                        var isVisible = targetList.style.display === 'block';
+                        targetList.style.display = isVisible ? 'none' : 'block';
+                    }
+                }
+            });
+        }
+
+        // 두 카드에 토글 기능 적용
+        if (fastToggle) setupToggle(fastToggle);
+        if (slowToggle) setupToggle(slowToggle);
         
         // 🌟 사이드바 토글 로직 추가 (수정됨)
         var toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
@@ -684,6 +912,51 @@
         // ----------------------------------
 
 
+        // 💡 [추가] '현재 내 위치' 버튼 클릭 이벤트
+        if (myLocationBtn) {
+            myLocationBtn.addEventListener('click', function() {
+                
+                // 1. 브라우저가 Geolocation을 지원하는지 확인
+                if (navigator.geolocation) {
+                    
+                    // 2. Geolocation API로 현재 위치 가져오기
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        
+                        // 3. 성공 시: 위도(latitude), 경도(longitude) 가져오기
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+                        
+                        var locPosition = new kakao.maps.LatLng(lat, lng); 
+                        
+                        // 4. 지도를 현재 위치로 부드럽게 이동
+                        map.panTo(locPosition);
+                        map.setLevel(3); // 줌 레벨 5로 확대
+
+                        // (선택 사항) 현재 위치에 임시 마커 표시
+                        var marker = new kakao.maps.Marker({
+                            position: locPosition
+                        });
+                        marker.setMap(map);
+                        
+                        // 2초 뒤에 마커 사라지게 하기 (임시 표시)
+                        setTimeout(function() {
+                            marker.setMap(null);
+                        }, 2000);
+
+                    }, function(error) {
+                        // 5. 실패 시: 오류 처리
+                        console.error('Geolocation 오류:', error);
+                        alert('현재 위치를 가져올 수 없습니다. 위치 권한을 확인해주세요.');
+                    });
+                    
+                } else {
+                    // 브라우저가 Geolocation을 지원하지 않는 경우
+                    alert('이 브라우저에서는 현재 위치 기능을 지원하지 않습니다.');
+                }
+            });
+        }
+
+
         // DOM 이벤트 리스너 설정
         closeBtn.addEventListener('click', function() {
             panel.style.display = 'none';
@@ -699,6 +972,12 @@
             var toggleContainer = document.getElementById('toggle-sidebar-btn-container');
             if (toggleContainer) {
                 toggleContainer.style.left = DEFAULT_TOGGLE_LEFT;
+            }
+
+            // 💡 [추가] 선택된 마커 초기화
+            if (selectedMarker) {
+                selectedMarker.setImage(null);
+                selectedMarker = null;
             }
         });
 
@@ -776,6 +1055,14 @@
         
         // 4-8. '반경' 검색 함수
         function fetchStationsDataByRadius(latitude, longitude) {
+            if (availableOnlyToggle) availableOnlyToggle.checked = false; // 💡 필터 초기화
+
+            // 💡 [추가] 선택된 마커 초기화
+            if (selectedMarker) {
+                selectedMarker.setImage(null);
+                selectedMarker = null;
+            }
+
             var radius = 2000; // 2km
             var url = '/searchByRadius?lat=' + latitude + '&lng=' + longitude + '&radius=' + radius; 
             
@@ -807,6 +1094,14 @@
         
         // 4-8-2. '키워드(LIKE)' 검색 함수 
         function searchByKeyword(keyword) {
+            if (availableOnlyToggle) availableOnlyToggle.checked = false; // 💡 필터 초기화
+
+            // 💡 [추가] 선택된 마커 초기화
+            if (selectedMarker) {
+                selectedMarker.setImage(null);
+                selectedMarker = null;
+            }
+
             var url = '/searchByKeyword?keyword=' + encodeURIComponent(keyword); 
             
             fetch(url)
@@ -838,7 +1133,14 @@
         
         // 💡 4-14. '지도 영역' 검색 함수
         function fetchStationsDataByBounds(minLat, maxLat, minLng, maxLng) {
-            
+            if (availableOnlyToggle) availableOnlyToggle.checked = false; // 💡 필터 초기화
+
+            // 💡 [추가] 선택된 마커 초기화
+            if (selectedMarker) {
+                selectedMarker.setImage(null);
+                selectedMarker = null;
+            }
+
             var url = "/searchByBounds?minLat=" + encodeURIComponent(minLat) + 
                       "&maxLat=" + encodeURIComponent(maxLat) + 
                       "&minLng=" + encodeURIComponent(minLng) + 
